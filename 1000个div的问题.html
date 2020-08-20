@@ -6,6 +6,41 @@
   <title>1000个div的问题</title>
 </head>
 <body>
-  
+  <div id="root"></div>
 </body>
+<script>
+  // 假如一次性创建大量的div标签的话，对性能的影响很大，很有可能造成页面的卡死，所以这时我们就可以使用分时加载来处理
+
+  var timeThunk = function(arr, fn, count){
+
+    var t;
+
+    var start = function(){
+      for(var i = 0; i < Math.min(count || 1, arr.length); i ++){
+        var obj = arr.shift()
+        fn(obj)
+      }
+    }
+
+    return function(){
+      t = setInterval(()=>{
+        if(arr.length === 0){
+          clearInterval(t)
+        }
+        start()
+      }, 1000)
+    }
+  }
+
+  var arr = new Array(1000000).fill(0).map((item,index) => index)
+
+  var renderList = timeThunk(arr, function (n) {
+    const root = document.querySelector('#root')
+    const div = document.createElement('div')
+    div.innerHTML = `这是第${n}个div`
+    root.appendChild(div)
+  }, 20)
+
+  renderList()
+</script>
 </html>
